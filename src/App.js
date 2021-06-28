@@ -47,13 +47,12 @@ class App extends React.Component {
   }
 
   bundeslandHandlerTaxNum(e) {   
-    console.log("e.target.value: ", e.target.value);
     this.setState({ bundesland: e.target.value});
     e.preventDefault();
   };
   handleSubmitTaxNum(e) {
     var bl = this.state.bundesland;
-    const stnr = bl === 'all' ? gm.generate('DE', 'stnr') : gm.generate('DE', 'stnr', {state:bl});
+    const stnr = bl === 'Alle Bundesländer' ? gm.generate('DE', 'stnr') : gm.generate('DE', 'stnr', {state:bl});
     this.setState({ taxNumber: stnr });
     e.preventDefault();
   }
@@ -82,7 +81,7 @@ class App extends React.Component {
 
   generateAllValues(e) {
     var bl = this.state.bundesland;
-    const stnr = bl === 'all' ? gm.generate('DE', 'stnr') : gm.generate('DE', 'stnr', {state:bl});
+    const stnr = bl === 'Alle Bundesländer'  ? gm.generate('DE', 'stnr') : gm.generate('DE', 'stnr', {state:bl});
   
     this.setState({
       taxIDNumber: createSteuerIdDigits(),
