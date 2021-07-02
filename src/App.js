@@ -136,13 +136,13 @@ class App extends React.Component {
     return (
       <div className="App">
         <header >
-          <h1>Generator for IBAN, Tax ID and Tax Numbers </h1>
+          <h1>Generator for VAT ID, Tax ID, Tax Number and IBAN </h1>
         </header>
 
         <div>
 
           <form>
-            <label className="label">USt ID: &#160;</label>
+            <label className="label">VAT ID: &#160;</label>
             <input type="text" className="todo-input" disabled value={this.state.ustID} />
             <p>&#160;</p>
             <div className="select">
