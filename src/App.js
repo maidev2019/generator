@@ -36,9 +36,11 @@ var countriesForIBAN = [
 function getIndex(country) {
   return countriesForIBAN.findIndex(obj => obj.value === country);
 }
-function buildUSTID(country) {
 
-  return '0';
+function buildUSTID(country) {
+  const countryEntry = countriesForUmsatzID.find(obj => obj.label === country);
+  const num = countryEntry.value + Math.floor(Math.random() * (999999999 - 100000000));
+  return num;
 }
 
 class App extends React.Component {
@@ -53,7 +55,7 @@ class App extends React.Component {
       bundesland: 'Alle Bundesländer',
       taxNumber: gm.generate('DE', 'stnr'),
       ustIDCountry: 'Deutschland',
-      ustID: 'DE' + Math.floor(Math.random() * (999999999 - 100000000)),
+      ustID: buildUSTID('Deutschland'),
     };
     this.bundeslandHandlerTaxNum = this.bundeslandHandlerTaxNum.bind(this);
     this.handleSubmitTaxNum = this.handleSubmitTaxNum.bind(this);
@@ -67,7 +69,7 @@ class App extends React.Component {
   }
 
   bundeslandHandlerTaxNum(e) {
-    
+
     this.setState({ bundesland: e.target.value === "all" ? 'Alle Bundesländer' : e.target.value });
     e.preventDefault();
   };
@@ -103,18 +105,20 @@ class App extends React.Component {
   generateAllValues(e) {
     var bl = this.state.bundesland;
     const stnr = bl === 'Alle Bundesländer' ? gm.generate('DE', 'stnr') : gm.generate('DE', 'stnr', { state: bl });
-
+    const num = buildUSTID(this.state.ustIDCountry);
+    
     this.setState({
       taxIDNumber: createSteuerIdDigits(),
       taxNumber: stnr,
-      iban: buildIbans(this.state.country)
+      iban: buildIbans(this.state.country),
+      ustID: num
     });
 
   }
 
   handleOnChangeUstID(e) {
-    const country = countriesForUmsatzID.find(obj => obj.label === e.target.value);    
-    const num = country.value + Math.floor(Math.random() * (999999999 - 100000000));
+    const num = buildUSTID(e.target.value);
+    
     this.setState({
       ustID: num,
       ustIDCountry: e.target.value
@@ -122,13 +126,16 @@ class App extends React.Component {
     e.preventDefault();
   }
   handleSubmitUstID(e) {
-    const country = countriesForUmsatzID.find(obj => { console.log('country: ', this.state.ustIDCountry); return obj.label === this.state.ustIDCountry });
-    const num = country.value + Math.floor(Math.random() * (999999999 - 100000000));
+
+    const num = buildUSTID(this.state.ustIDCountry);
     this.setState({
-      ustID: num
+      ustID: num,
     });
+
     e.preventDefault();
   }
+
+
 
 
 
