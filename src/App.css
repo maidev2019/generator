@@ -6,7 +6,7 @@
   box-sizing: border-box;
 }
 body {
-  background-image: linear-gradient(120deg, #3f3b80 0%, #322196 100%);
+  background-image: linear-gradient(120deg, #8966da 0%, #2c44cc 100%);
   color: white;
   font-family: "Poppins", sans-serif;
   min-height: 100vh;
@@ -17,7 +17,7 @@ header {
 
 header,
 form {
-  min-height: 20vh;
+  min-height: 15vh;
   display: flex;
   justify-content: center;
   align-items: center;

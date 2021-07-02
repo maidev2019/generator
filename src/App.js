@@ -5,25 +5,40 @@ import { buildIbans } from './mapp4';
 import { createSteuerIdDigits } from './strId';
 const gm = require('avris-generator');
 
+var countriesForUmsatzID = [
+  { value: 'HR', label: 'Kroatien' },
+  { value: 'DK', label: 'Dänemark' },
+  { value: 'FR', label: 'Frankreich' },
+  { value: 'DE', label: 'Deutschland' },
+  { value: 'IE', label: 'Ireland' },
+  { value: 'IT', label: 'Italien' },
+  { value: 'LU', label: 'Luxemburg' },
+  { value: 'NL', label: 'Niederland' },
+];
+
 var countriesForIBAN = [
-  { value: 'Croatia', label: 'Kroatien', select: false },
-  { value: 'Denmark', label: 'Dänemark', select: false },
-  { value: 'Egypt', label: 'Ägypten', select: false },
-  { value: 'France', label: 'Frankreich', select: false },
-  { value: 'Germany', label: 'Deutschland', select: true },
-  { value: 'Greece', label: 'Griechenland', select: false },
-  { value: 'Iran', label: 'Iran', select: false },
-  { value: 'Ireland', label: 'Ireland', select: false },
-  { value: 'Italy', label: 'Italien', select: false },
-  { value: 'Luxembourg', label: 'Luxemburg', select: false },
-  { value: 'Netherlands', label: 'Niederland', select: false },
-  { value: 'Switzerland', label: 'Schweiz', select: false },
-  { value: 'Turkey', label: 'Türkei', select: false },
-  { value: 'UK', label: 'Großbritanien', select: false },
+  { value: 'Croatia', label: 'Kroatien' },
+  { value: 'Denmark', label: 'Dänemark' },
+  { value: 'Egypt', label: 'Ägypten' },
+  { value: 'France', label: 'Frankreich' },
+  { value: 'Germany', label: 'Deutschland' },
+  { value: 'Greece', label: 'Griechenland' },
+  { value: 'Iran', label: 'Iran' },
+  { value: 'Ireland', label: 'Ireland' },
+  { value: 'Italy', label: 'Italien' },
+  { value: 'Luxembourg', label: 'Luxemburg' },
+  { value: 'Netherlands', label: 'Niederland' },
+  { value: 'Switzerland', label: 'Schweiz' },
+  { value: 'Turkey', label: 'Türkei' },
+  { value: 'UK', label: 'Großbritanien' },
 ];
 
 function getIndex(country) {
   return countriesForIBAN.findIndex(obj => obj.value === country);
+}
+function buildUSTID(country) {
+
+  return '0';
 }
 
 class App extends React.Component {
@@ -36,7 +51,9 @@ class App extends React.Component {
       iban: buildIbans('Germany'),
       taxIDNumber: createSteuerIdDigits(),
       bundesland: 'Alle Bundesländer',
-      taxNumber: gm.generate('DE', 'stnr')
+      taxNumber: gm.generate('DE', 'stnr'),
+      ustIDCountry: 'Deutschland',
+      ustID: 'DE' + Math.floor(Math.random() * (999999999 - 100000000)),
     };
     this.bundeslandHandlerTaxNum = this.bundeslandHandlerTaxNum.bind(this);
     this.handleSubmitTaxNum = this.handleSubmitTaxNum.bind(this);
@@ -44,15 +61,19 @@ class App extends React.Component {
     this.countryHandler = this.countryHandler.bind(this);
     this.handleSubmitIBAN = this.handleSubmitIBAN.bind(this);
     this.generateAllValues = this.generateAllValues.bind(this);
+    this.handleSubmitUstID = this.handleSubmitUstID.bind(this);
+    this.handleOnChangeUstID = this.handleOnChangeUstID.bind(this);
+
   }
 
-  bundeslandHandlerTaxNum(e) {   
-    this.setState({ bundesland: e.target.value});
+  bundeslandHandlerTaxNum(e) {
+    
+    this.setState({ bundesland: e.target.value === "all" ? 'Alle Bundesländer' : e.target.value });
     e.preventDefault();
   };
   handleSubmitTaxNum(e) {
     var bl = this.state.bundesland;
-    const stnr = bl === 'Alle Bundesländer' ? gm.generate('DE', 'stnr') : gm.generate('DE', 'stnr', {state:bl});
+    const stnr = bl === 'Alle Bundesländer' ? gm.generate('DE', 'stnr') : gm.generate('DE', 'stnr', { state: bl });
     this.setState({ taxNumber: stnr });
     e.preventDefault();
   }
@@ -81,8 +102,8 @@ class App extends React.Component {
 
   generateAllValues(e) {
     var bl = this.state.bundesland;
-    const stnr = bl === 'Alle Bundesländer'  ? gm.generate('DE', 'stnr') : gm.generate('DE', 'stnr', {state:bl});
-  
+    const stnr = bl === 'Alle Bundesländer' ? gm.generate('DE', 'stnr') : gm.generate('DE', 'stnr', { state: bl });
+
     this.setState({
       taxIDNumber: createSteuerIdDigits(),
       taxNumber: stnr,
@@ -91,12 +112,53 @@ class App extends React.Component {
 
   }
 
+  handleOnChangeUstID(e) {
+    const country = countriesForUmsatzID.find(obj => obj.label === e.target.value);    
+    const num = country.value + Math.floor(Math.random() * (999999999 - 100000000));
+    this.setState({
+      ustID: num,
+      ustIDCountry: e.target.value
+    });
+    e.preventDefault();
+  }
+  handleSubmitUstID(e) {
+    const country = countriesForUmsatzID.find(obj => { console.log('country: ', this.state.ustIDCountry); return obj.label === this.state.ustIDCountry });
+    const num = country.value + Math.floor(Math.random() * (999999999 - 100000000));
+    this.setState({
+      ustID: num
+    });
+    e.preventDefault();
+  }
+
+
+
   render() {
     return (
       <div className="App">
         <header >
           <h1>Generator for IBAN, Tax ID and Tax Numbers </h1>
         </header>
+
+        <div>
+
+          <form>
+            <label className="label">USt ID: &#160;</label>
+            <input type="text" className="todo-input" disabled value={this.state.ustID} />
+            <p>&#160;</p>
+            <div className="select">
+
+              <select value={this.state.ustIDCountry} className="filter-todo" name="ustid" onChange={this.handleOnChangeUstID}>
+                {countriesForUmsatzID.map((option) => (
+                  <option key={option.value} value={option.label}>{option.label}</option>
+                ))}
+              </select>
+
+            </div>
+            <button onClick={this.handleSubmitUstID} className="todo-button">
+              <i className="fas fa-random"></i>
+            </button>
+          </form>
+        </div>
 
         <div>
           <div className="mybutton">
@@ -154,7 +216,7 @@ class App extends React.Component {
 
               <select value={this.state.country} className="filter-todo" name="iban" onChange={this.countryHandler}>
                 {countriesForIBAN.map((option) => (
-                  <option value={option.value}>{option.label}</option>
+                  <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
 
