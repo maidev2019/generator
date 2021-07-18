@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './App.css';
+import ReactModal from 'react-modal';
+import { Form } from 'react-bootstrap'; 
+import { CSVLink } from "react-csv";
 
 import { buildIbans } from './mapp4';
 import { createSteuerIdDigits } from './strId';
+
+
+ReactModal.setAppElement('#main');
+
 const gm = require('avris-generator');
 
 var countriesForUmsatzID = [
@@ -33,9 +40,17 @@ var countriesForIBAN = [
   { value: 'UK', label: 'Großbritanien' },
 ];
 
-function getIndex(country) {
-  return countriesForIBAN.findIndex(obj => obj.value === country);
-}
+const csvHeaders = [
+  { label: "Environment", key: "environment" },  
+  { label: "Program", key: "program" },
+  { label: "TaxNumber", key: "taxnumber" },
+  { label: "TaxID", key: "taxid" },
+  { label: "IBAN", key: "iban" },
+  { label: "RequestNumber", key: "requestnumber" },
+  { label: "ProcessNumber", key: "processnumber" },
+];
+ 
+const csvData = [];
 
 function buildUSTID(country) {
   const countryEntry = countriesForUmsatzID.find(obj => obj.label === country);
@@ -49,14 +64,23 @@ class App extends React.Component {
     super(props);
     this.state = {
       country: 'Germany',
-      selected: getIndex('Germany'),
       iban: buildIbans('Germany'),
       taxIDNumber: createSteuerIdDigits(),
       bundesland: 'Alle Bundesländer',
       taxNumber: gm.generate('DE', 'stnr'),
       ustIDCountry: 'Deutschland',
       ustID: buildUSTID('Deutschland'),
+
+      showModal: false,
+      environment:'STAGE',
+      programm:'NSH',
+      request: 'NSH1p-',
+      process:'',
+      requestTaxNum:'',
+      requestTaxID: '',
+      requestIban: ''
     };
+
     this.bundeslandHandlerTaxNum = this.bundeslandHandlerTaxNum.bind(this);
     this.handleSubmitTaxNum = this.handleSubmitTaxNum.bind(this);
     this.handleSubmitTaxID = this.handleSubmitTaxID.bind(this);
@@ -65,12 +89,20 @@ class App extends React.Component {
     this.generateAllValues = this.generateAllValues.bind(this);
     this.handleSubmitUstID = this.handleSubmitUstID.bind(this);
     this.handleOnChangeUstID = this.handleOnChangeUstID.bind(this);
-
+    // CSV and Modal handler 
+    this.handleCSVData = this.handleCSVData.bind(this);
+    this.handleOpenModal = this.handleOpenModal.bind(this);
+    this.handleCloseModal = this.handleCloseModal.bind(this);
+    this.handleSaveData = this.handleSaveData.bind(this);
+    
   }
 
+ 
+  
   bundeslandHandlerTaxNum(e) {
-
-    this.setState({ bundesland: e.target.value === "all" ? 'Alle Bundesländer' : e.target.value });
+    const bl = e.target.value === "all" ? 'Alle Bundesländer' : e.target.value
+    const stnr = bl === 'Alle Bundesländer' ? gm.generate('DE', 'stnr') : gm.generate('DE', 'stnr', { state: bl });
+    this.setState({ bundesland: bl , taxNumber: stnr});
     e.preventDefault();
   };
   handleSubmitTaxNum(e) {
@@ -89,7 +121,6 @@ class App extends React.Component {
     const value = target.value;
     this.setState({
       country: value,
-      selected: countriesForIBAN.indexOf(value),
       iban: buildIbans(value)
     });
     e.preventDefault();
@@ -135,8 +166,29 @@ class App extends React.Component {
     e.preventDefault();
   }
 
-
-
+// CSV and Modal handler BEGIN
+  handleCSVData(e){
+    console.log("Click");
+  }
+  handleOpenModal () {
+    this.setState({ showModal: true });
+  }
+  
+  handleCloseModal () {
+    this.setState({ showModal: false });
+  }
+  handleSaveData(){
+   
+    csvData.push({  environment: this.state.environment, 
+                    program: this.state.programm, 
+                    taxnumber: this.state.requestTaxNum === '' ? this.state.taxNumber : this.state.requestTaxNum,
+                    taxid: this.state.requestTaxID === '' ? this.state.taxIDNumber:this.state.requestTaxID, 
+                    iban: this.state.requestIban === '' ? this.state.iban :this.state.requestIban, 
+                    requestnumber: this.state.request, 
+                    processnumber: this.state.process,  });
+    this.handleCloseModal();
+  }
+// CSV and Modal handler END
 
 
   render() {
@@ -234,13 +286,63 @@ class App extends React.Component {
           </form>
         </div>
         <center>
-          <button onClick={this.generateAllValues} id="buttontest" >
-            Generate <i className="fas fa-random"></i>
-          </button>
+          <div>
+            <button  id="generatorAll" onClick={this.generateAllValues} className="buttontest" >
+              Generate <i className="fas fa-random"></i>
+            </button>
+          </div>
+          
         </center>
+        <div>.</div>
+        <center>
+          <div>
+            <button className="buttontest Spacing" onClick={this.handleOpenModal}>Add to CSV</button>
+            <CSVLink  className="buttontest Decoration Spacing Spacing" data={csvData} headers={csvHeaders} filename={"UBHData.csv"}>Export CSV</CSVLink>
+            
+            <ReactModal isOpen={this.state.showModal} 
+                        contentLabel="onRequestClose Example"
+                        onRequestClose={this.handleCloseModal}
+                        className="Modal"
+                        overlayClassName="Overlay">
+              <p className="ModalText" >Save the information about NSH1P for testing NSHXP cases! </p>
+              <br></br>
+              <Form>
+                <Form.Group size="lg">
+                <Form.Label className="ModalLabel" >Environment</Form.Label>
+                  <Form.Label className="ModalLabel" >Program</Form.Label>
+                  <Form.Label className="ModalLabel" >RequestID</Form.Label>
+                  <Form.Label className="ModalLabel" >ProcessID</Form.Label>
+                  <Form.Label className="ModalLabel" >TaxID</Form.Label>
+                  <Form.Label className="ModalLabel" >TaxNumber</Form.Label>
+                  <Form.Label className="ModalLabel" >Iban</Form.Label>
+                </Form.Group>
+                <Form.Group size="lg">
+                <Form.Control className = "ModalInput" type="text" defaultValue="STAGE" onInput={e => this.setState({environment: e.target.value})} />
+                  <Form.Control className = "ModalInput" type="text" defaultValue="NSH" onInput={e => this.setState({programm: e.target.value})} />
+                  <Form.Control className = "ModalInput" type="text" defaultValue="NSH1P-" onInput={e => this.setState({request: e.target.value})}/>
+                  <Form.Control className = "ModalInput" type="text" defaultValue="" onInput={e => this.setState({process: e.target.value})}/>
+                  <Form.Control className = "ModalInput" type="text" defaultValue={this.state.taxNumber} onInput={e => this.setState({requestTaxNum: e.target.value})}/>
+                  <Form.Control className = "ModalInput" type="text" defaultValue={this.state.taxIDNumber} onInput={e => this.setState({requestTaxID: e.target.value})}/>
+                  <Form.Control className = "ModalInput" type="text" defaultValue={this.state.iban} onInput={e => this.setState({requestIban: e.target.value})} />
+                </Form.Group>                
+              </Form>
+
+              <br></br>
+              <center>
+                <button className="ModalCloseButton" onClick={this.handleCloseModal}>Close</button>
+              
+                <button className="Spacing ButtonModal" onClick={this.handleSaveData}>Save Changes</button>
+              </center>
+              
+            </ReactModal>
+          </div>
+          
+        </center>
+      
       </div>
     );
   }
 }
 
 export default App;
+
