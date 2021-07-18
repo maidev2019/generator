@@ -48,6 +48,7 @@ const csvHeaders = [
   { label: "IBAN", key: "iban" },
   { label: "RequestNumber", key: "requestnumber" },
   { label: "ProcessNumber", key: "processnumber" },
+  { label: "Decision", key: "decision" },
 ];
  
 const csvData = [];
