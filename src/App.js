@@ -287,8 +287,8 @@ class App extends React.Component {
         </div>
         <center>
           <div>
-            <button  id="generatorAll" onClick={this.generateAllValues} className="buttontest" >
-              Generate <i className="fas fa-random"></i>
+            <button  id="generatorAll" onClick={this.generateAllValues} className="buttontest">
+            <i className="fas fa-random"></i> Generate 
             </button>
           </div>
           
@@ -296,8 +296,8 @@ class App extends React.Component {
         <div>.</div>
         <center>
           <div>
-            <button className="buttontest Spacing" onClick={this.handleOpenModal}>Add to CSV</button>
-            <CSVLink  className="buttontest Decoration Spacing Spacing" data={csvData} headers={csvHeaders} filename={"UBHData.csv"}>Export CSV</CSVLink>
+            <button className="buttontest Spacing" onClick={this.handleOpenModal}> <i class="fas fa-plus-square"></i> Add to CSV</button>
+            <CSVLink  className="buttontest Decoration Spacing Spacing" data={csvData} headers={csvHeaders} filename={"UBHData.csv"}><i class="fas fa-cloud-download-alt"></i> Download CSV</CSVLink>
             
             <ReactModal isOpen={this.state.showModal} 
                         contentLabel="onRequestClose Example"
