@@ -75,7 +75,7 @@ class App extends React.Component {
       showModal: false,
       environment:'STAGE',
       programm:'NSH',
-      request: 'NSH1p-',
+      request: 'NSH1P-',
       process:'',
       requestTaxNum:'',
       requestTaxID: '',
