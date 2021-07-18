@@ -78,7 +78,8 @@ class App extends React.Component {
       process:'',
       requestTaxNum:'',
       requestTaxID: '',
-      requestIban: ''
+      requestIban: '', 
+      decision: 'in Assessment'
     };
 
     this.bundeslandHandlerTaxNum = this.bundeslandHandlerTaxNum.bind(this);
@@ -179,7 +180,8 @@ class App extends React.Component {
   }
   handleSaveData(){
    
-    csvData.push({  environment: this.state.environment, 
+    csvData.push({  decision: this.state.decision,
+                    environment: this.state.environment, 
                     program: this.state.programm, 
                     taxnumber: this.state.requestTaxNum === '' ? this.state.taxNumber : this.state.requestTaxNum,
                     taxid: this.state.requestTaxID === '' ? this.state.taxIDNumber:this.state.requestTaxID, 
@@ -315,6 +317,7 @@ class App extends React.Component {
                   <Form.Label className="ModalLabel" >TaxID</Form.Label>
                   <Form.Label className="ModalLabel" >TaxNumber</Form.Label>
                   <Form.Label className="ModalLabel" >Iban</Form.Label>
+                  <Form.Label className="ModalLabel" >Decision</Form.Label>
                 </Form.Group>
                 <Form.Group size="lg">
                 <Form.Control className = "ModalInput" type="text" defaultValue="STAGE" onInput={e => this.setState({environment: e.target.value})} />
@@ -324,6 +327,7 @@ class App extends React.Component {
                   <Form.Control className = "ModalInput" type="text" defaultValue={this.state.taxNumber} onInput={e => this.setState({requestTaxNum: e.target.value})}/>
                   <Form.Control className = "ModalInput" type="text" defaultValue={this.state.taxIDNumber} onInput={e => this.setState({requestTaxID: e.target.value})}/>
                   <Form.Control className = "ModalInput" type="text" defaultValue={this.state.iban} onInput={e => this.setState({requestIban: e.target.value})} />
+                  <Form.Control className = "ModalInput" type="text" defaultValue={this.state.decision} onInput={e => this.setState({decision: e.target.value})} />
                 </Form.Group>                
               </Form>
 
