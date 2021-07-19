@@ -370,7 +370,7 @@ class App extends React.Component {
               <p className="ModalText" >The new functions (Add to CSV, Download CSV) are for NSH+ DarkProcessing (DirectPayment,AdvancedPayment) and ManualProcessing. 
               The point is that NSH+ has a new STP score, which is evaluated with 30 points. 
               This STP score says that an NSH+ request will only go into AdvancePayment, DirectPayment if a request in NSH with the same tax number, tax ID or IBAN has already been made and approved or partially approved. 
-              Requests in NSH and NSH+ go to Darkproccesing if the STP score in total is less than 20 points, otherwise the request goes to ManualProcessing. 
+              Requests in NSH and NSH+ go to Darkproccesing if the STP score in total is less than or equal 20 points, otherwise the request goes to ManualProcessing. 
               In order to have enough data for end-to-end testing of NSH+, it makes sense to save some NSH requests with as many info as possible (environment, program, RequestID, ProcessingID, TaxNumber, TaxID, IBAN) to a CSV file.</p>
               
              <button className="HelpModalCloseButton" onClick={this.handleCloseHelpModal}>Close</button>
