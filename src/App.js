@@ -73,6 +73,7 @@ class App extends React.Component {
       ustID: buildUSTID('Deutschland'),
 
       showModal: false,
+      showHelpModal: false,
       environment:'STAGE',
       programm:'NSH',
       request: 'NSH1P-',
@@ -96,6 +97,11 @@ class App extends React.Component {
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handleSaveData = this.handleSaveData.bind(this);
+
+
+    this.handleOpenHelpModal = this.handleOpenHelpModal.bind(this);
+    this.handleCloseHelpModal= this.handleCloseHelpModal.bind(this);
+    
     
   }
 
@@ -179,6 +185,12 @@ class App extends React.Component {
   handleCloseModal () {
     this.setState({ showModal: false });
   }
+  handleOpenHelpModal () {
+    this.setState({ showHelpModal: true });
+  }
+  handleCloseHelpModal() {
+      this.setState({ showHelpModal: false });
+  }
   handleSaveData(){
    
     csvData.push({  decision: this.state.decision,
@@ -191,6 +203,8 @@ class App extends React.Component {
                     processnumber: this.state.process,  });
     this.handleCloseModal();
   }
+
+
 // CSV and Modal handler END
 
 
@@ -341,6 +355,29 @@ class App extends React.Component {
               
             </ReactModal>
           </div>
+          <br></br>
+
+
+          <div>
+            <button className="buttontest Spacing" onClick={this.handleOpenHelpModal}> <i class="fas fa-info-circle"></i> Help</button>
+          
+            <ReactModal isOpen={this.state.showHelpModal} 
+                        contentLabel="onRequestClose Example"
+                        onRequestClose={this.handleCloseHelpModal}
+                        className="ModalHelp"
+                        overlayClassName="Overlay">
+              <h2>Help:</h2>
+              <p className="ModalText" >The new functions (Add to CSV, Download CSV) are for NSH+ DarkProcessing (DirectPayment,AdvancedPayment) and ManualProcessing. 
+              The point is that NSH+ has a new STP score, which is evaluated with 30 points. 
+              This STP score says that an NSH+ request will only go into AdvancePayment, DirectPayment if a request in NSH with the same tax number, tax ID or IBAN has already been made and approved or partially approved. 
+              Requests in NSH and NSH+ go to Darkproccesing if the STP score in total is less than 20 points, otherwise the request goes to ManualProcessing. 
+              In order to have enough data for end-to-end testing of NSH+, it makes sense to save some NSH requests with as many info as possible (environment, program, RequestID, ProcessingID, TaxNumber, TaxID, IBAN) to a CSV file.</p>
+              
+             <button className="HelpModalCloseButton" onClick={this.handleCloseHelpModal}>Close</button>
+              
+            </ReactModal>
+          </div>
+
           
         </center>
       
