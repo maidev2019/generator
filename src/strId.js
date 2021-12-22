@@ -61,21 +61,33 @@ function calcCheckDigit(digits) {
         }
         prod = (sum * 2) % 11;
     }
-
     let check = 11 - prod;
     if (check === 10) {
         check = 0;
     }
-
     return check;
 }
 
 export function createSteuerIdDigits() {
-    const digits = getFirstTenDigits();
+
+    var digits = getFirstTenDigits();
     digits.push(calcCheckDigit(digits));
     var s = getIndexoffThreeDigitsInRow(digits);
-    return checkThreeDigistAreInRow(s, digits).toString().replaceAll(',','');;
+    var taxID = checkThreeDigistAreInRow(s, digits).toString().replaceAll(',','');
+    taxID = checkFirstDigitIsNotZero(taxID);
+    return taxID;
 }
+function checkFirstDigitIsNotZero(digits) {
+    var  taxID = digits;
+    while(taxID[0] === '0'){        
+        digits = getFirstTenDigits();
+        digits.push(calcCheckDigit(digits));
+        var s = getIndexoffThreeDigitsInRow(digits);
+        taxID = checkThreeDigistAreInRow(s, digits).toString().replaceAll(',','');
+    }
+    return taxID; 
+}
+
 function checkThreeDigistAreInRow(s, digits) {
     var threeInRow = false;
     if (s !== -1 && digits[s] === digits[s - 1] && digits[s - 1] === digits[s - 2]) {

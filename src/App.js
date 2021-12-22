@@ -1,16 +1,10 @@
 import React from 'react';
 import './App.css';
-import ReactModal from 'react-modal';
-import { Form } from 'react-bootstrap'; 
-import { CSVLink } from "react-csv";
-
 import { buildIbans } from './mapp4';
 import { createSteuerIdDigits } from './strId';
 
-
-ReactModal.setAppElement('#main');
-
 const gm = require('avris-generator');
+const crypto = require('crypto');
 
 var countriesForUmsatzID = [
   { value: 'HR', label: 'Kroatien' },
@@ -26,32 +20,14 @@ var countriesForUmsatzID = [
 var countriesForIBAN = [
   { value: 'Croatia', label: 'Kroatien' },
   { value: 'Denmark', label: 'Dänemark' },
-  { value: 'Egypt', label: 'Ägypten' },
-  { value: 'France', label: 'Frankreich' },
   { value: 'Germany', label: 'Deutschland' },
   { value: 'Greece', label: 'Griechenland' },
-  { value: 'Iran', label: 'Iran' },
   { value: 'Ireland', label: 'Ireland' },
   { value: 'Italy', label: 'Italien' },
   { value: 'Luxembourg', label: 'Luxemburg' },
-  { value: 'Netherlands', label: 'Niederland' },
   { value: 'Switzerland', label: 'Schweiz' },
   { value: 'Turkey', label: 'Türkei' },
-  { value: 'UK', label: 'Großbritanien' },
 ];
-
-const csvHeaders = [
-  { label: "Environment", key: "environment" },  
-  { label: "Program", key: "program" },
-  { label: "TaxNumber", key: "taxnumber" },
-  { label: "TaxID", key: "taxid" },
-  { label: "IBAN", key: "iban" },
-  { label: "RequestNumber", key: "requestnumber" },
-  { label: "ProcessNumber", key: "processnumber" },
-  { label: "Decision", key: "decision" },
-];
- 
-const csvData = [];
 
 function buildUSTID(country) {
   const countryEntry = countriesForUmsatzID.find(obj => obj.label === country);
@@ -63,25 +39,17 @@ class App extends React.Component {
 
   constructor(props) {
     super(props);
+    const newIban = buildIbans('Germany');
+    const sha256Iban = crypto.createHash('sha256').update(newIban).digest('hex')
     this.state = {
       country: 'Germany',
-      iban: buildIbans('Germany'),
+      iban: newIban,
       taxIDNumber: createSteuerIdDigits(),
       bundesland: 'Alle Bundesländer',
       taxNumber: gm.generate('DE', 'stnr'),
       ustIDCountry: 'Deutschland',
       ustID: buildUSTID('Deutschland'),
-
-      showModal: false,
-      showHelpModal: false,
-      environment:'STAGE',
-      programm:'NSH',
-      request: 'NSH1P-',
-      process:'',
-      requestTaxNum:'',
-      requestTaxID: '',
-      requestIban: '', 
-      decision: 'in Assessment'
+      shaIban: sha256Iban,
     };
 
     this.bundeslandHandlerTaxNum = this.bundeslandHandlerTaxNum.bind(this);
@@ -92,20 +60,7 @@ class App extends React.Component {
     this.generateAllValues = this.generateAllValues.bind(this);
     this.handleSubmitUstID = this.handleSubmitUstID.bind(this);
     this.handleOnChangeUstID = this.handleOnChangeUstID.bind(this);
-    // CSV and Modal handler 
-    this.handleCSVData = this.handleCSVData.bind(this);
-    this.handleOpenModal = this.handleOpenModal.bind(this);
-    this.handleCloseModal = this.handleCloseModal.bind(this);
-    this.handleSaveData = this.handleSaveData.bind(this);
-
-
-    this.handleOpenHelpModal = this.handleOpenHelpModal.bind(this);
-    this.handleCloseHelpModal= this.handleCloseHelpModal.bind(this);
-    
-    
   }
-
- 
   
   bundeslandHandlerTaxNum(e) {
     const bl = e.target.value === "all" ? 'Alle Bundesländer' : e.target.value
@@ -127,16 +82,22 @@ class App extends React.Component {
   countryHandler(e) {
     const target = e.target;
     const value = target.value;
+    const newIban = buildIbans(value);
+    const sha256_hash =  crypto.createHash('sha256').update(newIban).digest('hex');
     this.setState({
       country: value,
-      iban: buildIbans(value)
+      iban: newIban,
+      shaIban : sha256_hash,
     });
     e.preventDefault();
   };
 
   handleSubmitIBAN(e) {
+    const newIban = buildIbans(this.state.country)
+    const sha256_hash =  crypto.createHash('sha256').update(newIban).digest('hex');
     this.setState({
-      iban: buildIbans(this.state.country)
+      iban: newIban,
+      shaIban: sha256_hash,
     });
     e.preventDefault();
   }
@@ -145,12 +106,15 @@ class App extends React.Component {
     var bl = this.state.bundesland;
     const stnr = bl === 'Alle Bundesländer' ? gm.generate('DE', 'stnr') : gm.generate('DE', 'stnr', { state: bl });
     const num = buildUSTID(this.state.ustIDCountry);
-    
+    const newIban = buildIbans(this.state.country)
+    const sha256_hash =  crypto.createHash('sha256').update(newIban).digest('hex');
+    console.log("sha256_hash", sha256_hash);
     this.setState({
       taxIDNumber: createSteuerIdDigits(),
       taxNumber: stnr,
-      iban: buildIbans(this.state.country),
-      ustID: num
+      iban: newIban,
+      ustID: num,
+      shaIban: sha256_hash
     });
 
   }
@@ -174,38 +138,8 @@ class App extends React.Component {
     e.preventDefault();
   }
 
-// CSV and Modal handler BEGIN
-  handleCSVData(e){
-    console.log("Click");
-  }
-  handleOpenModal () {
-    this.setState({ showModal: true });
-  }
-  
-  handleCloseModal () {
-    this.setState({ showModal: false });
-  }
-  handleOpenHelpModal () {
-    this.setState({ showHelpModal: true });
-  }
-  handleCloseHelpModal() {
-      this.setState({ showHelpModal: false });
-  }
-  handleSaveData(){
-   
-    csvData.push({  decision: this.state.decision,
-                    environment: this.state.environment, 
-                    program: this.state.programm, 
-                    taxnumber: this.state.requestTaxNum === '' ? this.state.taxNumber : this.state.requestTaxNum,
-                    taxid: this.state.requestTaxID === '' ? this.state.taxIDNumber:this.state.requestTaxID, 
-                    iban: this.state.requestIban === '' ? this.state.iban :this.state.requestIban, 
-                    requestnumber: this.state.request, 
-                    processnumber: this.state.process,  });
-    this.handleCloseModal();
-  }
+ 
 
-
-// CSV and Modal handler END
 
 
   render() {
@@ -302,6 +236,19 @@ class App extends React.Component {
             </button>
           </form>
         </div>
+
+        <div>
+          <center>
+            <label className="label">SHA256 hash code for iban : &#160;</label>
+          </center>
+          <form>
+            
+            <input type="text" className="label_SHA" disabled value={this.state.shaIban} />
+            
+          </form>
+        </div>
+
+
         <center>
           <div>
             <button  id="generatorAll" onClick={this.generateAllValues} className="buttontest">
@@ -310,77 +257,6 @@ class App extends React.Component {
           </div>
           
         </center>
-        <div>.</div>
-        <center>
-          <div>
-            <button className="buttontest Spacing" onClick={this.handleOpenModal}> <i class="fas fa-plus-square"></i> Add to CSV</button>
-            <CSVLink  className="buttontest Decoration Spacing Spacing" data={csvData} headers={csvHeaders} filename={"UBHData.csv"}><i class="fas fa-cloud-download-alt"></i> Download CSV</CSVLink>
-            
-            <ReactModal isOpen={this.state.showModal} 
-                        contentLabel="onRequestClose Example"
-                        onRequestClose={this.handleCloseModal}
-                        className="Modal"
-                        overlayClassName="Overlay">
-              <p className="ModalText" >Save the information about NSH1P for testing NSHXP cases! </p>
-              <br></br>
-              <Form>
-                <Form.Group size="lg">
-                <Form.Label className="ModalLabel" >Environment</Form.Label>
-                  <Form.Label className="ModalLabel" >Program</Form.Label>
-                  <Form.Label className="ModalLabel" >RequestID</Form.Label>
-                  <Form.Label className="ModalLabel" >ProcessID</Form.Label>
-                  <Form.Label className="ModalLabel" >TaxID</Form.Label>
-                  <Form.Label className="ModalLabel" >TaxNumber</Form.Label>
-                  <Form.Label className="ModalLabel" >Iban</Form.Label>
-                  <Form.Label className="ModalLabel" >Decision</Form.Label>
-                </Form.Group>
-                <Form.Group size="lg">
-                <Form.Control className = "ModalInput" type="text" defaultValue="STAGE" onInput={e => this.setState({environment: e.target.value})} />
-                  <Form.Control className = "ModalInput" type="text" defaultValue="NSH" onInput={e => this.setState({programm: e.target.value})} />
-                  <Form.Control className = "ModalInput" type="text" defaultValue="NSH1P-" onInput={e => this.setState({request: e.target.value})}/>
-                  <Form.Control className = "ModalInput" type="text" defaultValue="" onInput={e => this.setState({process: e.target.value})}/>
-                  <Form.Control className = "ModalInput" type="text" defaultValue={this.state.taxNumber} onInput={e => this.setState({requestTaxNum: e.target.value})}/>
-                  <Form.Control className = "ModalInput" type="text" defaultValue={this.state.taxIDNumber} onInput={e => this.setState({requestTaxID: e.target.value})}/>
-                  <Form.Control className = "ModalInput" type="text" defaultValue={this.state.iban} onInput={e => this.setState({requestIban: e.target.value})} />
-                  <Form.Control className = "ModalInput" type="text" defaultValue={this.state.decision} onInput={e => this.setState({decision: e.target.value})} />
-                </Form.Group>                
-              </Form>
-
-              <br></br>
-              <center>
-                <button className="ModalCloseButton" onClick={this.handleCloseModal}>Close</button>
-              
-                <button className="Spacing ButtonModal" onClick={this.handleSaveData}>Save Changes</button>
-              </center>
-              
-            </ReactModal>
-          </div>
-          <br></br>
-
-
-          <div>
-            <button className="buttontest Spacing" onClick={this.handleOpenHelpModal}> <i class="fas fa-info-circle"></i> Help</button>
-          
-            <ReactModal isOpen={this.state.showHelpModal} 
-                        contentLabel="onRequestClose Example"
-                        onRequestClose={this.handleCloseHelpModal}
-                        className="ModalHelp"
-                        overlayClassName="Overlay">
-              <h2>Help:</h2>
-              <p className="ModalText" >The new functions (Add to CSV, Download CSV) are for NSH+ DarkProcessing (DirectPayment,AdvancedPayment) and ManualProcessing. 
-              The point is that NSH+ has a new STP score, which is evaluated with 30 points. 
-              This STP score says that an NSH+ request will only go into AdvancePayment, DirectPayment if a request in NSH with the same tax number, tax ID or IBAN has already been made and approved or partially approved. 
-              Requests in NSH and NSH+ go to Darkproccesing if the STP score in total is less than or equal 20 points, otherwise the request goes to ManualProcessing. 
-              In order to have enough data for end-to-end testing of NSH+, it makes sense to save some NSH requests with as many info as possible (environment, program, RequestID, ProcessingID, TaxNumber, TaxID, IBAN) to a CSV file.</p>
-              
-             <button className="HelpModalCloseButton" onClick={this.handleCloseHelpModal}>Close</button>
-              
-            </ReactModal>
-          </div>
-
-          
-        </center>
-      
       </div>
     );
   }
