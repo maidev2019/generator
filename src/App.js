@@ -31,8 +31,12 @@ var countriesForIBAN = [
 
 function buildUSTID(country) {
   const countryEntry = countriesForUmsatzID.find(obj => obj.label === country);
-  const num = countryEntry.value + Math.floor(Math.random() * (999999999 - 100000000));
-  return num;
+  var num = Math.random().toString().slice(2,11);
+  while(num.toString().length < 9 || num.toString().charAt(0) === '0'){
+    num =  Math.random().toString().slice(2,11);
+  }
+  const vatId= countryEntry.value + num;
+  return vatId;
 }
 
 class App extends React.Component {
@@ -138,10 +142,6 @@ class App extends React.Component {
     e.preventDefault();
   }
 
- 
-
-
-
   render() {
     return (
       <div className="App">
@@ -152,7 +152,7 @@ class App extends React.Component {
         <div>
 
           <form>
-            <label className="label">VAT ID: &#160;</label>
+            <label className="label">Vat ID: &#160;</label>
             <input type="text" className="todo-input" disabled value={this.state.ustID} />
             <p>&#160;</p>
             <div className="select">
