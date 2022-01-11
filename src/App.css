@@ -27,6 +27,14 @@ form {
   justify-content: center;
   align-items: center;
 }
+
+form div div {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .buttontest, form input,
 form button {
   padding: 0.5rem;
