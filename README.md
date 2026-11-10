@@ -1,70 +1,105 @@
-# Getting Started with Create React App
+# Generator Studio · Version 2.0
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A redesigned React application for generating **synthetic test data**: German tax IDs (`Steuer-ID`), state-specific tax numbers (`Steuernummer`), VAT IDs (`USt-IdNr.`), European IBANs, and the SHA-256 hash of the currently generated IBAN.
 
-## Available Scripts
+Built from the original [`maidev2019/generator`](https://github.com/maidev2019/generator) project. The original generator files are kept in `legacy/` for reference and rollback.
 
-In the project directory, you can run:
+## New in v2
 
-### `npm start`
+- Modern, responsive UI with sidebar and generator cards
+- English / German switch, light / dark mode
+- Copy individual values or the entire JSON dataset
+- Country and state selectors with automatic regeneration
+- Linked SHA-256 hash: recalculated whenever IBAN changes
+- Batch generator (5, 10, 25, 50 or 100 records) with CSV/JSON export
+- CSV includes a BOM and quotes every field; semicolon delimiter for Excel in Germany
+- Separate data, algorithms, components and UI files
+- Tests for Tax ID, IBAN and VAT formats; SHA-256 and CSV
+- GitHub Actions deployment to GitHub Pages
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Requirements
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Node.js **20.19+ or 22.12+** and npm. The app uses React 18 and Vite 6.
 
-### `npm test`
+```bash
+npm install
+npm run dev
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Visit the address shown in the terminal (normally http://localhost:5173/generator/).
 
-### `npm run build`
+To build the production bundle:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm test
+npm run build
+npm run preview
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+The build is written to `dist/`.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Publish to GitHub Pages
 
-### `npm run eject`
+1. Unzip the project and copy its **contents**, including the hidden `.github` directory, into the repository [`maidev2019/generator`](https://github.com/maidev2019/generator). Replace the old `src`, `public`, `package.json`, and `index.html` files. The old Create React App files are no longer required.
+2. Commit and push to `master` (or `main`).
+3. In the repository, open **Settings → Pages** and select **GitHub Actions** as the build/deployment source.
+4. The workflow `.github/workflows/deploy.yml` installs dependencies, tests, builds and publishes the `dist/` directory.
+5. When the workflow completes, the app should be available at <https://maidev2019.github.io/generator/>.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+For a different repository name, change the `base` path in `vite.config.js` to match its GitHub Pages subdirectory.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+**Note:** The supplied 2022 `package-lock.json` was intentionally removed, because the dependency tree has been modernized. Running `npm install` creates an updated lock file. Commit the new lock file to your repository for reproducible builds.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## Files and code organization
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```text
+src/
+  App.jsx                 Dashboard and UI state
+  styles.css              All responsive styles
+  i18n.js                 German/English strings
+  components/
+    GeneratorCard.jsx     Reusable card
+    Icon.jsx              Local SVG icon set
+  data/
+    options.js            Country and state options
+    taxOffices.js         Original 2022 tax-office mapping
+  lib/
+    random.js             Browser random-number helpers
+    taxId.js              German Tax ID checksum + generator
+    taxNumber.js          State-specific tax numbers using avris-generator
+    vatId.js              VAT ID formats (+ German checksum)
+    iban.js               IBAN generation / mod-97 validator
+    hash.js               SHA-256 with Web Crypto
+    generator.js          Dataset / field regeneration
+    export.js             CSV / JSON download
+```
 
-## Learn More
+## Technical notes and limitations
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+**These values are for testing only.** Even a structurally valid value may coincide with a real identifier. Never use generated values for payment instructions, tax filings or real identity verification. The app checks only supported checksums and patterns; it does not ask any government, bank, or tax registry whether an identifier was issued.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **Tax ID:** German 11-digit IdNr with valid checksum and digit-frequency constraints. The algorithm has been corrected from the original version.
+- **Tax number:** The state-specific number generator from the original project remains powered by [`avris-generator`](https://www.npmjs.com/package/avris-generator), with matching tax-office prefixes restricted to the list retained from 2022. **Office names may be outdated.** If the matching step fails, an explicit error is shown.
+- **VAT ID:** German VAT IDs use the official MOD 11,10 checksum. Other supported countries generate *format-shaped examples only*; their national checksums, registration, and VIES validity are not guaranteed.
+- **IBAN:** Nine countries, with country-specific length and MOD 97 check digits. Some countries may have additional national bank/account check-digit requirements that the tool does not implement. As in the original app, a few fixed bank prefixes are used; these do not guarantee live accounts.
+- **SHA-256:** Hashes the exact **unformatted**, uppercase IBAN using the browser Web Crypto API. This requires HTTPS (GitHub Pages) or localhost. It is **not** a password hash or encryption.
+- **Privacy:** Generated data never leaves the browser through the app's generation/export features. The app has no remote fonts or external data-service calls. A network connection is needed only to install npm dependencies or deploy updates.
+- **Batching:** Output is freshly generated per row. It is synthetic and not a database of real records.
 
-### Code Splitting
+## Automated verification
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+npm test
+```
 
-### Analyzing the Bundle Size
+The tests for standalone algorithms run with Node.js without needing to install the React dependencies. Full build verification still requires `npm install` and access to the package registry.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Sources for specifications
 
-### Making a Progressive Web App
+- ELSTER / BZSt, Prüfung der Steuer- und Steueridentifikationsnummer (15 April 2026): <https://download.elster.de/download/schnittstellen/Pruefung_der_Steuer_und_Steueridentifikatsnummer.pdf>
+- SWIFT, IBAN Registry: <https://www.swift.com/standards/standards-resources>
+- German VAT ID checksum, § 9 ZMDV Annex 3: <https://www.haufe.de/id/norm/datentraeger-verordnung-ueber-die-abgabe-zusammenfassender-anlage-3-zu-9-HI1378226.html>
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## License
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Original `avris-generator` remains a separately licensed third-party library. Keep its license notices. This redesign retains original project files in `legacy/` for transparency.

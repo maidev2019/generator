@@ -1,48 +1,22 @@
 {
-  "name": "generator",
-  "version": "0.1.0",
+  "name": "generator-studio",
   "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/react": "^11.2.7",
-    "@testing-library/user-event": "^12.8.3",
-    "avris-generator": "^0.8.1",
-    "bootstrap": "^5.0.2",
-    "chance": "^1.1.7",
-    "gh-pages": "^3.2.3",
-    "lodash": "^4.17.21",
-    "react": "^17.0.2",
-    "react-bootstrap": "^1.6.1",
-    "react-csv": "^2.0.3",
-    "react-dom": "^17.0.2",
-    "react-modal": "^3.14.3",
-    "react-scripts": "4.0.3",
-    "web-vitals": "^1.1.2"
-  },
-  "homepage": "https://maidev2019.github.io/generator",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "Local-only sample-data generator for German tax numbers and European IBANs",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "deploy": "gh-pages -d build"
+    "dev": "vite --host 0.0.0.0",
+    "start": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "dependencies": {
+    "avris-generator": "^0.8.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "devDependencies": {
+    "vite": "^6.3.5"
   }
 }
