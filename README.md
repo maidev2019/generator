@@ -1,10 +1,17 @@
-# Generator Studio · Version 2.0
+# Generator Studio · Version 2.1
 
 A redesigned React application for generating **synthetic test data**: German tax IDs (`Steuer-ID`), state-specific tax numbers (`Steuernummer`), VAT IDs (`USt-IdNr.`), European IBANs, and the SHA-256 hash of the currently generated IBAN.
 
 Built from the original [`maidev2019/generator`](https://github.com/maidev2019/generator) project. The original generator files are kept in `legacy/` for reference and rollback.
 
-## New in v2
+## New in v2.1
+
+- Generator-first layout: removed the large hero banner and four KPI tiles
+- Compact workspace header with Generate all and Copy all actions
+- Generator cards appear immediately at the top on desktop and mobile
+- Improved use of available screen space without modifying generation algorithms
+
+## Original v2 features
 
 - Modern, responsive UI with sidebar and generator cards
 - English / German switch, light / dark mode

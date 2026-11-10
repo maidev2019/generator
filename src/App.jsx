@@ -35,17 +35,13 @@ function Sidebar({ t, active, setActive, open, setOpen }) {
         : <a key={item.id} href={`#${item.id}`} className={`nav-link ${active === item.id ? 'active' : ''}`} onClick={() => { setActive(item.id); setOpen(false); }}><Icon name={item.icon} size={18} /><span>{item.label}</span>{active === item.id && <span className="nav-dot" />}</a>
       )}</nav><div className="side-section project-section">PROJECT</div><a className="nav-link" href={SOURCE_URL} target="_blank" rel="noreferrer"><Icon name="github" size={18}/><span>{t.project}</span><Icon name="arrow" size={14}/></a></div>
       <div className="sidebar-bottom"><div className="privacy-illustration"><Icon name="shield" size={22}/><span className="privacy-glow"/></div><div><strong>{t.local}</strong><p>{t.localBlurb}</p></div></div>
-      <div className="sidebar-version">GENERATOR STUDIO <span>v2.0</span></div>
+      <div className="sidebar-version">GENERATOR STUDIO <span>v2.1</span></div>
     </aside>
   </>;
 }
 
 function CountrySelect({ label, value, options, onChange, lang, disabled = false }) {
   return <label className="field-select"><span className="field-label">{label}</span><div className="select-wrap"><select value={value} onChange={event => onChange(event.target.value)} disabled={disabled}>{options.map(item => <option value={item.code} key={item.code}>{item.flag ? `${item.flag}  ` : ''}{item[lang]}</option>)}</select><Icon name="chevronDown" size={16}/></div></label>;
-}
-
-function SummaryStat({ icon, value, label, tone }) {
-  return <div className="stat"><div className={`stat-icon stat-${tone}`}><Icon name={icon} size={19}/></div><div><strong>{value}</strong><span>{label}</span></div></div>;
 }
 
 function App() {
@@ -141,11 +137,17 @@ function App() {
     <main id="overview" className="main-view">
       <div className="topbar"><div className="topbar-left"><button className="top-mobile-menu icon-button" onClick={() => setNavOpen(true)} aria-label={t.navOpen}><Icon name="menu" size={22}/></button><span className="breadcrumbs">{t.breadcrumb}</span></div><div className="topbar-actions"><span className="online-chip"><span className="online-circle"/>{t.online}</span><button className="header-tool lang-button" title={t.language} onClick={() => setLang(lang === 'en' ? 'de' : 'en')}><Icon name="globe" size={17}/><span>{lang.toUpperCase()}</span></button><button className="header-tool theme-button" title={t.dark} aria-label={t.dark} onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}><Icon name={theme === 'light' ? 'moon' : 'sun'} size={18}/></button></div></div>
       <div className="page-content">
-        <div className="hero"><div className="hero-content"><div className="eyebrow"><span className="eyebrow-star">✦</span> GENERATOR STUDIO <span className="eyebrow-line"/></div><h1>{t.tagline.split('\n').map((line, i) => <React.Fragment key={i}>{i > 0 && <br/>}{line}</React.Fragment>)}</h1><p>{t.intro}</p><div className="hero-actions"><button className="primary-btn" disabled={busy} onClick={() => regenerate('all')}><Icon name="sparkles" size={18}/>{busy ? t.generating : t.generateAll}<Icon name="arrow" size={18}/></button><button className="secondary-btn" disabled={!data} onClick={() => copy(JSON.stringify(data, null, 2), 'all')}><Icon name={copied === 'all' ? 'check' : 'copy'} size={17}/>{t.copyAll}</button></div></div><div className="hero-art" aria-hidden="true"><div className="art-orbit art-one"/><div className="art-orbit art-two"/><div className="art-card art-back"><div className="art-code">01010011</div><div className="art-mini-line"/><div className="art-mini-line short"/></div><div className="art-card art-front"><span className="art-symbol">{`{ }`}</span><span className="art-card-lines"><i/><i/><i/></span><span className="art-circle"><Icon name="check" size={22}/></span></div><div className="art-spark art-spark-one">✦</div><div className="art-spark art-spark-two">✧</div></div><span className="hero-badge"><Icon name="shield" size={14}/>{t.badge}</span></div>
-
-        <section className="stat-grid" aria-label="Overview metrics"><SummaryStat icon="layers" value="05" label={t.stats1} tone="indigo"/><SummaryStat icon="building" value="16" label={t.stats2} tone="blue"/><SummaryStat icon="globe" value="09" label={t.stats3} tone="purple"/><SummaryStat icon="shield" value={t.privacyValue} label={t.stats4} tone="green"/></section>
-
-        <div className="section-heading"><div><div className="small-overline">01 / DATA WORKSPACE</div><h2>{t.sectionTitle}</h2><p>{t.sectionSubtitle}</p></div><span className="section-status"><span className="status-dot"/>{t.modified}</span></div>
+        <section className="workspace-toolbar" aria-labelledby="workspace-title">
+          <div className="workspace-intro">
+            <div className="workspace-kicker"><Icon name="sparkles" size={15}/><span>GENERATOR STUDIO</span><span className="workspace-kicker-divider"/><span className="workspace-test-tag"><Icon name="shield" size={13}/>{t.badge}</span></div>
+            <h1 id="workspace-title">{t.sectionTitle}</h1>
+            <p>{t.sectionSubtitle}</p>
+          </div>
+          <div className="workspace-actions">
+            <button className="primary-btn" disabled={busy} onClick={() => regenerate('all')}><Icon name="sparkles" size={17}/>{busy ? t.generating : t.generateAll}</button>
+            <button className="workspace-copy-btn" disabled={!data} onClick={() => copy(JSON.stringify(data, null, 2), 'all')}><Icon name={copied === 'all' ? 'check' : 'copy'} size={16}/>{t.copyAll}</button>
+          </div>
+        </section>
 
         <div className="generator-grid">
           <GeneratorCard id="vat" order="01" icon="wallet" variant="indigo" title={t.vat} subtitle={t.vatSubtitle} value={data?.vatId} note={settings.vatCountry === 'DE' ? t.checksum : t.formatOnly} onCopy={() => copy(data?.vatId, 'vat')} onRegenerate={() => regenerate('vat')} {...copyParam('vat')}>
